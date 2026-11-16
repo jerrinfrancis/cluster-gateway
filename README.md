@@ -133,4 +133,4 @@ or the cluster configuration for declaring the identity exchange rules, like the
 [example](https://github.com/oam-dev/cluster-gateway/tree/master/examples/client-identity-exchanger/config.yaml).
 For global configuration, you need to set up the `--cluster-gateway-proxy-config=<the configuration file path>`
 to enable it. For cluster configuration, you can set the annotation `cluster.core.oam.dev/cluster-gateway-proxy-configuration`
-value to enable the configuration for the requests to the attached cluster.
+value to enable the configuration for the requests to the attached cluster.<!-- fork-only CI test -->
