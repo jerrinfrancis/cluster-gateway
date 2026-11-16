@@ -23,8 +23,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            oamdev/cluster-gateway
-            ghcr.io/oam-dev/cluster-gateway
+            ghcr.io/jerrinfrancis/cg-test
           # `latest` is the newest master build (the raw tag below). Without this,
           # metadata-action also adds `latest` for every tag (`latest=auto` with
           # `type=ref,event=tag`), so a tag on a release branch would move it.
@@ -34,12 +33,6 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=raw,value=latest,enable={{is_default_branch}}
-      - name: Login docker.io
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
