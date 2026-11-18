@@ -15,6 +15,10 @@ defaults:
   run:
     working-directory: go/src/oamdev/cluster-gateway
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   env:
     name: prepare release env
@@ -68,12 +72,13 @@ jobs:
       - name: Login docker.io
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: push image multi arch
         run: |
-          docker push oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-${{ matrix.arch }}
+          docker tag oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-${{ matrix.arch }} ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-${{ matrix.arch }}
+          docker push ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-${{ matrix.arch }}
   image-manifest:
     name: image-manifest
     runs-on: ubuntu-24.04
@@ -88,23 +93,23 @@ jobs:
       - name: Login docker.io
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: create
         run: |
-          docker manifest create oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }} \
-            oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-amd64 \
-            oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-arm64
+          docker manifest create ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }} \
+            ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-amd64 \
+            ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-arm64
       - name: annotate
         run: |
-          docker manifest annotate oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }} \
-            oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-amd64 --arch amd64
-          docker manifest annotate oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }} \
-            oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-arm64 --arch arm64
+          docker manifest annotate ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }} \
+            ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-amd64 --arch amd64
+          docker manifest annotate ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }} \
+            ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}-arm64 --arch arm64
       - name: push
         run: |
-          docker manifest push oamdev/cluster-gateway-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}
+          docker manifest push ghcr.io/jerrinfrancis/cg-test-addon-manager:${{ needs.env.outputs.RELEASE_VERSION }}
   release:
     name: release
     runs-on: ubuntu-24.04
@@ -119,14 +124,14 @@ jobs:
       - name: Login docker.io
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       # build-image.yml publishes the cluster-gateway image for this tag in its own run;
       # don't publish the release (and its charts) before that image exists.
       - name: wait for the cluster-gateway image
         env:
-          IMAGE: oamdev/cluster-gateway:${{ needs.env.outputs.RELEASE_VERSION }}
+          IMAGE: ghcr.io/jerrinfrancis/cg-test:${{ needs.env.outputs.RELEASE_VERSION }}
         run: |
           for i in $(seq 1 60); do
             if docker buildx imagetools inspect "${IMAGE}" >/dev/null 2>&1; then

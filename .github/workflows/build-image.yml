@@ -30,8 +30,7 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: |
-            oamdev/cluster-gateway
-            ghcr.io/oam-dev/cluster-gateway
+            ghcr.io/jerrinfrancis/cg-test
           # Without this, metadata-action adds `latest` for every tag (`latest=auto` with
           # `type=ref,event=tag`), so the last tag pushed on any branch moved it. `latest`
           # is set after the push instead (the last step).
@@ -43,12 +42,6 @@ jobs:
             type=ref,event=branch
             type=raw,value={{branch}}-{{sha}},enable=${{ startsWith(github.ref, 'refs/heads/') }}
             type=ref,event=tag
-      - name: Login docker.io
-        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
